@@ -26,3 +26,4 @@ var/
 *.c
 output_file
 .vscode/settings.json
+file-sample_1MB.docx
