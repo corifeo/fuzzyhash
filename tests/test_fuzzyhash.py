@@ -67,13 +67,20 @@ class Test_FuzzyHashingFiles(unittest.TestCase):
         def setUp(self):
                 # create a new 64MB file
                 with open('output_file', 'wb') as file:
-                        file.write(os.urandom(1024*1024*64))
+                        file.write(os.urandom(1024*1024*16))
 
         def test_fuzzyhashing_smallfile(self):
                 obj = FuzzyHashGenerate()
                 result = obj.hash_from_file('output_file')
                 print(result)
                 self.assertIsNotNone(result) 
+
+        def test_fuzzyhashing_smallfile2(self):
+                obj = FuzzyHashGenerate()
+                result = obj.hash_from_file('file-sample_1MB.docx')
+                print(result)
+                self.assertIsNotNone(result) 
+
 
 if __name__ == '__main__':
     unittest.main()

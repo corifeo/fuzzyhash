@@ -5,8 +5,6 @@ import os
 import io
 import time
 import math
-import logging
-
 import numpy as np
 from string import ascii_lowercase, ascii_uppercase, digits
 from fuzzyhash.modules.sumhash import CythonSumHash
@@ -17,8 +15,6 @@ MAX_DIGEST_LEN = 64
 MIN_BLOCKSIZE = 3
 HASH_INIT = 0x27
 BUFFER_SIZE = 8096
-
-logging.basicConfig(level=logging.DEBUG)
 
 class FuzzyHashGenerate(object):
     def __init__(self, block_size=None, buffer_size=BUFFER_SIZE):
@@ -73,10 +69,14 @@ class FuzzyHashGenerate(object):
         """ Calculate modulo of rolling hashes """
         return np.array(self.modulus_context.rawmod(rolling_hash, modulo))
 
+    def _check_correct_blocksize(self, modulo_hash):
+        return (np.sum(modulo_hash[:,0] == (self._block_size -1)) < (MAX_DIGEST_LEN // 2) and (self._block_size is not MIN_BLOCKSIZE))
+
     def _calc_modulo_masks(self, modulo_hash):
         """ Calculate spamsum triggers and broadcasting list into array locations """
         self.rolling_hash_long = np.insert(np.argwhere(np.array(modulo_hash[:,0] == (self._block_size -1))).flatten()+1, 0, 0)
         self.rolling_hash_short = np.insert(np.argwhere(np.array(modulo_hash[:,1] == (2*self._block_size -1))).flatten()+1, 0, 0)
+
         self.long_mask = self.rolling_hash_long[np.arange(self.rolling_hash_long.size-1)[:, None] +np.arange(2)[None, :]]
         self.short_mask = self.rolling_hash_short[np.arange(self.rolling_hash_short.size-1)[:, None] +np.arange(2)[None, :]]
         
@@ -93,23 +93,18 @@ class FuzzyHashGenerate(object):
 
     def calc(self, buffer, stream_size):
         try:
-            logging.debug('Main function started')
             self._reset_hashes_state()
             self._reset_cython_functions()
-            logging.debug('Main function initialized')
             self._block_size = self._guess_blocksize(stream_size)
-            logging.debug('Guessed blocksize of {}'.format(self._block_size))
             self.sequence = self._ingest_buffer(buffer)
-            logging.debug('Loaded {} bytes from buffer'.format(self.sequence.size))
             self.rolling_hash = self._calc_rolling_hash(self.sequence)
             self.modulo_hash = self._calc_modulo_cython(self.rolling_hash, self._block_size)
-            logging.debug('Calculated rolling hash')
+            if self._check_correct_blocksize(self.modulo_hash):
+                self._block_size = (self._block_size//2)
+                self.modulo_hash = self._calc_modulo_cython(self.rolling_hash, self._block_size)
             self._calc_modulo_masks(self.modulo_hash)
-            logging.debug('Calculated modulo masks') 
             self._calc_sum_hash()
-            logging.debug('Calculated sum hash')
             self._generate_signature()
-            logging.debug('Signature finished in {} seconds'.format(round(np.float(time.time()) - self._timer, 5)))
         except:
             raise FuzzyException()
         return '{}:{}:{}'.format(self._block_size, self.long_hash, self.short_hash)
