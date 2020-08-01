@@ -1,0 +1,28 @@
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+old_code/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+*.spec
+.eggs
+# Cython
+*.pyc
+*.lib
+*.exp
+*.obj
+*.pyd
+*.c
+output_file
+.vscode/settings.json
