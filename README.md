@@ -1,4 +1,4 @@
-Implementation of ssdeep / spamsum fuzzy hashing algorithm in python and few lines of cython, not as fast as a pure C implemention but fast enough to process a malware samples folder in few seconds. All credit for the algorithm goes to the original author [PDF](https://www.dfrws.org/sites/default/files/session-files/paper-identifying_almost_identical_files_using_context_triggered_piecewise_hashing.pdf)
+Implementation of ssdeep / spamsum fuzzy hashing algorithm in python and few lines of cython, not as fast as original SSDeep C++ implementation but fast enough to process a malware samples folder in few seconds (throughput should be around 100MB/s, 100x faster than the pure python benchmark). All credit for the algorithm goes to the original author [PDF](https://www.dfrws.org/sites/default/files/session-files/paper-identifying_almost_identical_files_using_context_triggered_piecewise_hashing.pdf)
 
 
 # Installation (build cython modules)
